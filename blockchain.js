@@ -85,15 +85,23 @@ class BlockChain {
     }
 
     minePendingTransaction(miningRewardAddress) {
-        let block = new Block(Date.now(), this.pendingTransactions);
+        // let block = new Block(Date.now(), this.pendingTransactions);
+        // block.mineBlock(this.difficulty);
+
+        // console.log('Block Successfully Mined!');
+        // this.chain.push(block);
+
+        // this.pendingTransactions = [
+        //     new Transaction(null, miningRewardAddress, this.miningReward)
+        // ]
+
+        const rewardTx = new Transaction(null, miningRewardAddress, this.miningReward);
+        this.pendingTransactions.push(rewardTx);
+        let block = new Block(Date.now(), this.pendingTransactions, this.getLatestBlock().hash);
         block.mineBlock(this.difficulty);
-
-        console.log('Block Successfully Mined!');
+        console.log('Block successfully mined!');
         this.chain.push(block);
-
-        this.pendingTransactions = [
-            new Transaction(null, miningRewardAddress, this.miningReward)
-        ]
+        this.pendingTransactions = [];
     }
 
     addTransaction(transaction) {
@@ -103,6 +111,10 @@ class BlockChain {
 
         if(!transaction.isValid()){
             throw new Error('Cannot add invalid transaction to chain');
+        }
+
+        if (transaction.amount > this.getBalanceOfAddress(transaction.fromAddress)) {
+            throw new Error('There must be sufficient money in the wallet!');
         }
 
         this.pendingTransactions.push(transaction);
