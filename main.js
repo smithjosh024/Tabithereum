@@ -1,10 +1,17 @@
-const SHA256 = require('crypto-js/sha256')
+const SHA256 = require('crypto-js/sha256');
+
+class Transaction {
+    constructor(fromAddress, toAddress, amount) {
+        this.fromAddress = fromAddress;
+        this.toAddress = toAddress;
+        this.amount = amount;
+    }
+}
 
 class Block{
-    constructor(index, timestamp, data, previousHash = ''){
-        this.index = index;
+    constructor(timestamp, transactions, previousHash = ''){
         this.timestamp = timestamp;
-        this.data = data;
+        this.transactions = transactions;
         this.previousHash = previousHash;
         this.hash = this.calculateHash();
         this.nonce = 0;
@@ -28,20 +35,49 @@ class BlockChain {
     constructor() {
         this.chain = [this.createGenesisBlock()];
         this.difficulty = 2;
+        this.pendingTransactions = [];
+        this.miningReward = 100;
     }
 
     createGenesisBlock() {
-        return new Block(0,"01/01/2019", "Genesis Block", "0")
+        return new Block("01/01/2019", "Genesis Block", "0")
     }
 
     getLatestBlock() {
         return this.chain[this.chain.length - 1];
     }
 
-    addBlock(newBlock) {
-        newBlock.previousHash = this.getLatestBlock().hash;
-        newBlock.mineBlock(this.difficulty);
-        this.chain.push(newBlock);
+    minePendingTransaction(miningRewardAddress) {
+        let block = new Block(Date.now(), this.pendingTransactions);
+        block.mineBlock(this.difficulty);
+
+        console.log('Block Successfully Mined!');
+        this.chain.push(block);
+
+        this.pendingTransactions = [
+            new Transaction(null, miningRewardAddress, this.miningReward);
+        ]
+    }
+
+    createTransaction(transaction) {
+        this.pendingTransactions.push(transaction);
+    }
+
+    getBalanceOfAddress(address) {
+        let balance = 0;
+
+        for(const block of this.chain) {
+            for (const trans of block.transactions) {
+                if(trans.fromAddress === address) {
+                    balance -= trans.amount;
+                }
+                if(trans.address === address) {
+                    balance += trans.amount;
+                }
+            }
+        }
+
+        return balance;
     }
 
     isChainValid() {
@@ -62,16 +98,3 @@ class BlockChain {
 
 let Tabithereum = new BlockChain();
 
-console.log('Mining Black 1...');
-Tabithereum.addBlock(new Block(1,"01/02/2019", {amount: 4}));
-
-console.log('Mining Black 2...');
-Tabithereum.addBlock(new Block(2,"01/03/2019", {amount: 10}));
-
-
-
-// Tabithereum.chain[1].data = {amount: 100};
-// Tabithereum.chain[1].hash = Tabithereum.chain[1].calculateHash();
-
-// console.log('Is blockchain valid? ' + Tabithereum.isChainValid());
-// console.log(JSON.stringify(Tabithereum, null, 4));
