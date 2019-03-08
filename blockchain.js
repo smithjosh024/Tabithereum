@@ -95,3 +95,7 @@ class BlockChain {
         return true;
     }
 }
+
+
+module.exports.BlockChain = BlockChain;
+module.exports.Transaction = Transaction;

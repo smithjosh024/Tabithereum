@@ -1,3 +1,5 @@
+const {BlockChain, Transaction} = require('./blockchain');
+
 let Tabithereum = new BlockChain();
 Tabithereum.createTransaction(new Transaction('address1', 'address2', 100));
 Tabithereum.createTransaction(new Transaction('address2', 'address1', 50));
